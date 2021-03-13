@@ -1,0 +1,79 @@
+#include "udf.h"
+#include "stdio.h"
+DEFINE_PROFILE(Vx_of_Rotor,t,i)
+{
+	real F_Area[ND_ND],x[ND_ND];
+	real CG[ND_ND];
+	real one[ND_ND];
+	real R, w, Theta, del, k;
+	face_t f;
+	real time, dtime, Omega;
+	real a;
+	time=N_TIME;
+	dtime=CURRENT_TIMESTEP;
+	R=0.08205;
+	del=0.000635;
+	Omega=150.796416;
+	w=376.99104;
+	a=0;
+	CG[0]=0.0;
+	CG[1]=0.0;
+	begin_f_loop(f,t)
+  {
+	F_CENTROID(x,f,t);
+	CG[0] = CG[0] + x[0];
+	CG[1] = CG[1] + x[1];
+	a = a + 1;
+  }
+    end_f_loop(f,t)
+	CG[0]=CG[0]/a;
+	CG[1]=CG[1]/a;
+	begin_f_loop(f,t)
+  {
+    F_CENTROID(x,f,t);
+	one[0] = x[0] - CG[0];
+	one[1] = x[1] - CG[1];
+	R=sqrt(one[0]*one[0]+one[1]*one[1]);
+	Theta = atan2(one[1], one[0]);
+	F_PROFILE(f,t,i) = -R*w*cos(Theta-3.141592/2);
+  }
+  end_f_loop(f,t)
+}
+DEFINE_PROFILE(Vy_of_Rotor,t,i)
+{
+	real F_Area[ND_ND],x[ND_ND];
+	real CG[ND_ND];
+	real one[ND_ND];
+	real R, w, Theta, del;
+	real a;
+	face_t f;
+	real time, dtime, Omega;
+	time=N_TIME;
+	dtime=CURRENT_TIMESTEP;
+	a=0;
+	del=0.000635;
+	Omega=150.796416;
+	w=376.99104;
+	CG[0] = 0.0;
+	CG[1] = 0.0;
+	begin_f_loop(f,t)
+{
+	F_CENTROID(x,f,t);
+	CG[0]=CG[0]+x[0];
+	CG[1]=CG[1]+x[1];
+	a=a+1;
+}
+    end_f_loop(f,t)
+	CG[0]=CG[0]/a;
+	CG[1]=CG[1]/a;
+	begin_f_loop(f,t)
+{
+    F_CENTROID(x,f,t);
+	one[0] = x[0] - CG[0];
+	one[1] = x[1] - CG[1];
+	R=sqrt(one[0]*one[0]+one[1]*one[1]);
+	Theta = atan2(one[1], one[0]);
+	F_PROFILE(f,t,i) = -R*w*sin(Theta-3.141592/2);
+}
+    end_f_loop(f,t)
+}
